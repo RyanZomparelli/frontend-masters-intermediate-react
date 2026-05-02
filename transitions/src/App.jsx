@@ -1,18 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Score from "./Score";
 import getScore from "./getScore";
 
 export default function App() {
-  const [isPending, setIsPending] = useState(true);
+  // replace isPending useState to useTransition(). startTransition gives you back a isPending flag just like we had before.
+  const [isPending, startTransition] = useTransition();
   const [game, setGame] = useState(1);
   const [score, setScore] = useState({ home: "-", away: "-" });
 
+  // Update getNewScore with useTransition hook.
   async function getNewScore(game) {
-    setIsPending(true);
+    // Get rid of the isPending updates and use startTransition
     setGame(game);
-    const newScore = await getScore(game);
-    setScore(newScore);
-    setIsPending(false);
+    startTransition(async () => {
+      const newScore = await getScore(game);
+      startTransition(() => {
+        setScore(newScore);
+      });
+    });
   }
 
   useEffect(() => {
@@ -22,10 +27,7 @@ export default function App() {
   return (
     <div className="app">
       <h1>Game {game}</h1>
-      <select
-        disabled={isPending}
-        onChange={(e) => getNewScore(e.target.value)}
-      >
+      <select onChange={(e) => getNewScore(e.target.value)}>
         <option value={1}>Game 1</option>
         <option value={2}>Game 2</option>
         <option value={3}>Game 3</option>

@@ -58,6 +58,14 @@ This repo tracks my progress through the course while I build small examples by 
    - Understanding why object and function references fail `===` checks across renders
    - Understanding when memoization is useful and when it adds unnecessary complexity
    - Brief introduction to React Compiler as future-facing automatic memoization tooling
+   6. Transitions
+   - Building a scoreboard app with an intentionally slow API
+   - Comparing blocking loading state with transition-based updates
+   - Understanding why disabling UI during loading can create a poor user experience
+   - Using `useTransition` to keep the UI responsive during async updates
+   - Using `isPending` from `useTransition` to show loading feedback
+   - Using `startTransition` to mark non-urgent updates as interruptible
+   - Understanding how transitions help React prioritize newer user interactions over slower pending updates
 
 ## Key Concepts Covered
 
