@@ -1,27 +1,36 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useOptimistic, useTransition } from "react";
 
 export default function App() {
+  const [isPending, startTransition] = useTransition();
   const [thoughts, setThoughts] = useState([]);
   const [thought, setThought] = useState("");
+  const [optimisticThoughts, addOptimisticThought] = useOptimistic(
+    thoughts,
+    (oldThoughts, newThought) => [newThought, ...oldThoughts],
+  );
 
   async function postDeepThought() {
-    setThought("");
+    startTransition(async () => {
+      addOptimisticThought(`${thought} (Loading...)`);
+      setThought("");
 
-    const res = await fetch("/thoughts", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ thought }),
+      const res = await fetch("/thoughts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ thought }),
+      });
+
+      if (!res.ok) {
+        alert("This thought was not deep enough. Please try again.");
+        return;
+      }
+
+      const { thoughts: newThoughts } = await res.json();
+
+      setThoughts(newThoughts);
     });
-
-    if (!res.ok) {
-      alert("This thought was not deep enough. Please try again.");
-      return;
-    }
-
-    const { thoughts: newThoughts } = await res.json();
-    setThoughts(newThoughts);
   }
 
   useEffect(() => {
@@ -51,8 +60,8 @@ export default function App() {
         <button type="submit">Submit</button>
       </form>
       <ul>
-        {thoughts.map((thought) => (
-          <li key={thought}>{thought}</li>
+        {optimisticThoughts.map((thought, index) => (
+          <li key={index}>{thought}</li>
         ))}
       </ul>
     </div>
